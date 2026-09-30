@@ -1,0 +1,18 @@
+quantity,value,unit
+Young modulus E,7.0000000000e+10,Pa
+Poisson ratio nu,2.2000000000e-01,-
+Effective modulus E*,3.6780159731e+10,Pa
+Sphere radius R,5.0000000000e-03,m
+Effective radius R*,2.5000000000e-03,m
+Cube side L,5.0000000000e-03,m
+Cube face area,2.5000000000e-05,m^2
+Equal-area punch radius a,2.8209479177e-03,m
+Hertz stiffness at 2 um,5.2015000718e+06,N/m
+Flat-punch stiffness,2.0750983001e+08,N/m
+Stiffness ratio at 2 um,3.9894228040e+01,-
+Density,2.5000000000e+03,kg/m^3
+Coefficient of restitution,9.0000000000e-01,-
+Sphere mass,1.3089969390e-03,kg
+Sphere-sphere reduced mass,6.5449846950e-04,kg
+Normal damping gamma_n,3.9114027197e+00,N s/m
+Collision approach speed,1.8783418230e-01,m/s

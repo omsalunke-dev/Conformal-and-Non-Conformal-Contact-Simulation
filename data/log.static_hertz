@@ -1,0 +1,1169 @@
+LAMMPS (4 Jul 2026)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread.
+  using 1 OpenMP thread(s) per MPI task
+Loaded 1 plugins from C:\Users\Deepak\AppData\Local\LAMMPS 64-bit 4Jul2026\plugins
+# Quasi-static sphere-sphere overlap sweep
+# One particle pair, zero velocity. MODEL selects hooke or hertz.
+units           si
+atom_style      sphere
+boundary        f f f
+comm_modify     vel yes
+atom_modify     map array
+newton          on
+
+region          box block -0.02 0.04 -0.02 0.02 -0.02 0.02
+create_box      1 box
+Created orthogonal box = (-0.02 -0.02 -0.02) to (0.04 0.02 0.02)
+  1 by 1 by 1 MPI processor grid
+
+variable        model string hooke
+pair_style      granular
+pair_coeff      * * hertz/material 7.000000000000e+10 0.0 0.22 tangential linear_nohistory 0.0 0.0 damping velocity
+
+neighbor        0.002 bin
+neigh_modify    delay 0 every 1 check yes
+
+create_atoms    1 single 0.0 0.0 0.0
+Created 1 atoms
+  using lattice units in orthogonal box = (-0.02 -0.02 -0.02) to (0.04 0.02 0.02)
+  create_atoms CPU = 0.000 seconds
+create_atoms    1 single 0.009999 0.0 0.0
+Created 1 atoms
+  using lattice units in orthogonal box = (-0.02 -0.02 -0.02) to (0.04 0.02 0.02)
+  create_atoms CPU = 0.000 seconds
+set             atom 1*2 diameter 1.000000000000e-02
+Setting atom values ...
+  2 settings made for diameter
+set             atom 1*2 density 2500.0
+Setting atom values ...
+  2 settings made for density
+set             atom * vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  2 settings made for vx
+  2 settings made for vy
+  2 settings made for vz
+
+variable        i loop 20
+variable        delta equal v_i*1.0e-7
+variable        xpos equal 0.01-v_delta
+variable        fx1 equal fx[1]
+variable        x1 equal x[1]
+variable        x2a equal x[2]
+
+thermo          1
+thermo_style    custom step pe fmax
+
+label           loop
+reset_timestep  $i
+reset_timestep  1
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099999 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 0.012
+  ghost atom cutoff = 0.012
+  binsize = 0.006, bins = 10 7 7
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair granular, perpetual
+      attributes: half, newton on, size
+      pair build: half/size/bin/atomonly/newton
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+         1   0              0.077539385  
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+1 1e-07 0 0.0099999 -0.0775393849691098
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  2
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099998 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+         2   0              0.2193145    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+2 2e-07 0 0.0099998 -0.219314499685621
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  3
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099997 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+         3   0              0.40290646   
+Loop time of 1e-06 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1e-06      |            |       |100.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+3 3e-07 0 0.0099997 -0.402906463065917
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  4
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099996 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+         4   0              0.62031508   
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+4 4e-07 0 0.0099996 -0.620315079756914
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  5
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099995 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+         5   0              0.86691668   
+Loop time of 1e-06 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1e-06      |            |       |100.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+5 5e-07 0 0.0099995 -0.866916678631298
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  6
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099994 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+         6   0              1.1395916    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+6 6e-07 0 0.0099994 -1.13959156887119
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  7
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099993 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+         7   0              1.4360495    
+Loop time of 1e-06 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1e-06      |            |       |100.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+7 7e-07 0 0.0099993 -1.43604950610416
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  8
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099992 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+         8   0              1.754516     
+Loop time of 1e-06 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1e-06      |            |       |100.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+8 8e-07 0 0.0099992 -1.75451599747926
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  9
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099991 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+         9   0              2.0935634    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+9 9e-07 0 0.0099991 -2.09356339418412
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  10
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.009999 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        10   0              2.4520106    
+Loop time of 1e-06 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1e-06      |            |       |100.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+10 1e-06 0 0.009999 -2.45201064873564
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  11
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099989 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        11   0              2.8288595    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+11 1.1e-06 0 0.0099989 -2.82885951061883
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  12
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099988 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        12   0              3.2232517    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+12 1.2e-06 0 0.0099988 -3.22325170452733
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  13
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099987 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        13   0              3.634439     
+Loop time of 1e-06 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1e-06      |            |       |100.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+13 1.3e-06 0 0.0099987 -3.63443896889925
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  14
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099986 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        14   0              4.0617614    
+Loop time of 1e-06 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1e-06      |            |       |100.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+14 1.4e-06 0 0.0099986 -4.06176137553584
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  15
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099985 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        15   0              4.5046312    
+Loop time of 1e-06 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1e-06      |            |       |100.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+15 1.5e-06 0 0.0099985 -4.50463119994699
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  16
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099984 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        16   0              4.9625206    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+16 1.6e-06 0 0.0099984 -4.96252063807145
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  17
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099983 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        17   0              5.4349523    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+17 1.7e-06 0 0.0099983 -5.4349522643921
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  18
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099982 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        18   0              5.9214915    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+18 1.8e-06 0 0.0099982 -5.92149149148607
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  19
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.0099981 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        19   0              6.4217405    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+19 1.9e-06 0 0.0099981 -6.42174052132984
+next            i
+jump            SELF loop
+reset_timestep  $i
+reset_timestep  20
+set             atom 1 x 0.0 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set             atom 2 x ${xpos} y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+set             atom 2 x 0.009998 y 0.0 z 0.0 vx 0.0 vy 0.0 vz 0.0
+Setting atom values ...
+  1 settings made for x
+  1 settings made for y
+  1 settings made for z
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+run             0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 4.295 | 4.295 | 4.295 Mbytes
+   Step         PotEng          Fmax     
+        20   0              6.9353334    
+Loop time of 0 on 1 procs for 0 steps with 2 atoms
+
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0          |            |       |  0.00
+
+Nlocal:              2 ave           2 max           2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              1 ave           1 max           1 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1
+Ave neighs/atom = 0.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print           "$i ${delta} ${x1} ${x2a} ${fx1}" append ../data/static_hertz.dat
+20 2e-06 0 0.009998 -6.93533342904136
+next            i
+jump            SELF loop
+Total wall time: 0:00:00
