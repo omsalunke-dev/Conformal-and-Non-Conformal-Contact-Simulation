@@ -70,7 +70,7 @@ for the sphere pair.
 | `lammps/` | Sphere–sphere inputs: static hooke sweep, static Hertz sweep, head-on collision |
 | `figures/` | Force–overlap, stiffness–overlap, stiffness-ratio, and LAMMPS comparison plots |
 | `data/` | Parameters, theory tables, LAMMPS logs, and comparison tables |
-| `RESULTS.txt` | Numerical summary and modeling notes |
+| `RESULTS.md` | Numerical summary and modeling notes |
 
 LAMMPS uses `pair_style granular` with a hooke normal spring, `damping velocity`, and frictionless `linear_nohistory` tangential contact. A second static sweep uses `hertz/material` so the nonlinear Hertz force can be checked directly.
 
@@ -82,7 +82,7 @@ Python 3 with NumPy and Matplotlib, and a LAMMPS build that includes the GRANULA
 python contact_study.py
 ```
 
-The script rewrites the inputs, reruns the three LAMMPS cases, and refreshes `figures/`, `data/`, and `RESULTS.txt`.
+The script rewrites the inputs, reruns the three LAMMPS cases, and refreshes `figures/`, `data/`, and `RESULTS.md`.
 
 ## Agreement with LAMMPS
 

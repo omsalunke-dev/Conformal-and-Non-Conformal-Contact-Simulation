@@ -709,119 +709,167 @@ def compare(p: dict) -> dict:
     return stats
 
 
+def _sci(value: float, digits: int = 6, unit: str = "") -> str:
+    """LaTeX number, without dollar signs, so it can sit inside a math span."""
+    use_fixed = value != 0 and 0.01 <= abs(value) < 10000
+    if use_fixed:
+        body = f"{value:.{digits}f}".rstrip("0").rstrip(".")
+    else:
+        mantissa, exponent = f"{value:.{digits}e}".split("e")
+        body = f"{mantissa} \\times 10^{{{int(exponent)}}}"
+    if unit:
+        return f"{body}\\,{unit}"
+    return body
+
+
 def write_summary(p: dict, stats: dict) -> None:
     ratio = p["k_flat_Npm"] / p["k_sphere_Npm"]
     f_h_ref = (4.0 / 3.0) * p["E_star_Pa"] * math.sqrt(p["R_star_m"]) * DELTA_REF**1.5
     f_lin_ref = p["k_sphere_Npm"] * DELTA_REF
-    text = f"""Sphere-sphere contact study
-==========================
+    text = f"""# Sphere–sphere contact study
 
-Geometry and material
----------------------
-Sphere radius R = {R*1e3:.3f} mm, so the Hertz effective radius is R* = R/2 = {p['R_star_m']*1e3:.3f} mm.
-Cube side L = {L*1e3:.3f} mm, face area A = {p['face_area_m2']*1e6:.3f} mm^2.
-Equal-area circular punch radius a = sqrt(A/pi) = {p['punch_radius_m']*1e3:.4f} mm.
-E = {E/1e9:.2f} GPa, nu = {NU:.2f}.
-E* = E / (2(1-nu^2)) = {p['E_star_Pa']/1e9:.6f} GPa.
+## Geometry and material
 
-Contact laws
-------------
-Hertz force:        F = (4/3) E* sqrt(R*) delta^(3/2)
-Hertz stiffness:    k = dF/ddelta = 2 E* sqrt(R* delta)
-Flat-punch force:   F = 2 E* a delta
-Flat-punch stiffness is constant: k_flat = 2 E* a = {p['k_flat_Npm']:.6e} N/m.
+- Sphere radius $R = {R*1e3:.3f}\\,\\mathrm{{mm}}$, so $R^{{\\ast}} = R/2 = {p['R_star_m']*1e3:.3f}\\,\\mathrm{{mm}}$.
+- Cube side $L = {L*1e3:.3f}\\,\\mathrm{{mm}}$, face area $A = {p['face_area_m2']*1e6:.3f}\\,\\mathrm{{mm}}^2$.
+- Equal-area punch radius $a = \\sqrt{{A/\\pi}} = {p['punch_radius_m']*1e3:.4f}\\,\\mathrm{{mm}}$.
+- $E = {E/1e9:.2f}\\,\\mathrm{{GPa}}$, $\\nu = {NU:.2f}$.
 
-At delta = 2 um the Hertz tangent stiffness is k_H = {p['k_sphere_Npm']:.6e} N/m.
-The stiffness ratio k_flat / k_H(2 um) = {ratio:.4f}.
-The report values 5.20e6 N/m, 2.075e8 N/m and a ratio of about 39.9 are the same results rounded.
+```math
+E^{{\\ast}} = \\frac{{E}}{{2\\left(1-\\nu^{{2}}\\right)}} = {p['E_star_Pa']/1e9:.6f}\\,\\mathrm{{GPa}}.
+```
 
-Linear spring-dashpot used in LAMMPS
--------------------------------------
-Sphere spring: k_n = k_H(2 um) = {p['k_sphere_Npm']:.6e} N/m.
-This matches the tangent stiffness at 2 um. It does not match the Hertz force.
-At 2 um, F_linear / F_Hertz = {f_lin_ref/f_h_ref:.6f} (exactly 3/2 for this calibration).
-Density = {RHO:.1f} kg/m^3, sphere mass = {p['mass_sphere_kg']:.6e} kg,
-reduced mass = {p['mass_eff_kg']:.6e} kg, e = {RESTITUTION:.2f}.
-Damping coefficient gamma_n = {p['gamma_n']:.6e} N s/m,
-from gamma_n = -2 ln(e) sqrt(m_eff k_n) / sqrt(pi^2 + ln(e)^2).
-LAMMPS pair style: granular, normal model hooke, damping velocity,
-tangential linear_nohistory with zero friction.
-With damping velocity, the LAMMPS coefficient is gamma_n itself:
-F = k_n delta + gamma_n * d(delta)/dt during contact.
+## Contact laws
 
-LAMMPS tests
-------------
-1. Static overlap sweep, 0.1 um to 2.0 um in steps of 0.1 um, both particles at rest.
-   Hooke model versus k_n * delta:
-     max relative error = {stats['hooke_max_rel']:.3e}
-     rms relative error = {stats['hooke_rms_rel']:.3e}
-   Hertz/material model (E = 70 GPa, nu = 0.22) versus the Hertz formula:
-     max relative error = {stats['hertz_max_rel']:.3e}
-     rms relative error = {stats['hertz_rms_rel']:.3e}
-   At 2 um, F_linear / F_Hertz from the two LAMMPS models = {stats['force_ratio_at_2um']:.6f}.
+```math
+F_{{H}} = \\frac{{4}}{{3}} E^{{\\ast}} \\sqrt{{R^{{\\ast}}}} \\, \\delta^{{3/2}}
+```
 
-2. Head-on collision of two free spheres. Initial gap = 2 um.
-   Prescribed approach speed = {p['v_rel_mps']:.6e} m/s.
-   Measured incoming speed = {stats['v_in']:.6e} m/s.
-   Measured separating speed = {stats['v_out']:.6e} m/s.
-   Measured restitution = {stats['e_meas']:.6f} (target {RESTITUTION:.2f}).
-   Peak overlap = {stats['delta_max']*1e6:.4f} um.
-   Peak repulsive force = {stats['f_max']:.6f} N.
-   Contact samples = {stats['n_contact']}.
-   Force versus k_n*delta + gamma_n*delta_dot, using the half-step
-   velocity at which LAMMPS evaluates damping:
-     max relative error = {stats['collision_max_rel']:.3e}
-     rms relative error = {stats['collision_rms_rel']:.3e}
-   The same formula with the dumped end-of-step velocity is low by a
-   uniform factor. Median relative offset = {stats['collision_end_step_rel']:.3e},
-   which matches gamma_n*dt/m = {stats['half_kick']:.3e}.
+```math
+k_{{H}} = \\frac{{dF_{{H}}}}{{d\\delta}} = 2 E^{{\\ast}} \\sqrt{{R^{{\\ast}} \\delta}}
+```
 
-Modeling differences
---------------------
-- The LAMMPS hooke run reproduces the linear law. The largest relative force
-  error on the static sweep is about 8e-15, which is floating-point roundoff.
-- Hertz force grows as delta^(3/2). The linear spring calibrated to the tangent
-  stiffness at 2 um is stiffer, in the secant sense F/delta, at every overlap
-  in this range, and its force is 1.5 times the Hertz force at 2 um.
-- Loading and unloading in the collision do not follow a single force-overlap
-  curve. Damping adds force while the overlap is increasing and subtracts force
-  while the overlap is decreasing.
-- LAMMPS writes the velocity after the second velocity-Verlet kick. The pair
-  force was computed with the velocity from half a step earlier. Comparing the
-  dumped velocity directly to k_n*delta + gamma_n*delta_dot therefore shifts
-  every contact force by about gamma_n*dt/m, here 0.030%. Removing that
-  half-step leaves a residual at roundoff, so the contact law itself matches.
-- The measured restitution, 0.8997 against the target 0.90, is the same
-  timestep effect. The continuous-time damping formula is exact only as dt
-  goes to zero. This run uses 1e-7 s, about 350 steps of contact.
-- Near the end of contact the damping term can exceed the spring term, so the
-  pair force becomes tensile for a short interval. The input does not set
-  limit_damping, which is the LAMMPS option that removes that tensile spike.
-- The cube-cube flat-punch law is carried in the Python curves only. This
-  LAMMPS model is a sphere-sphere pair; a square face is not represented.
-- The flat-punch stiffness uses an equal-area circle of radius {p['punch_radius_m']*1e3:.4f} mm
-  in place of the square face. That geometric substitution is unchanged from
-  the weekly report.
+```math
+F_{{\\mathrm{{flat}}}} = 2 E^{{\\ast}} a \\, \\delta
+```
 
-Outputs
--------
-figures/force_overlap.png
-figures/stiffness_overlap.png
-figures/stiffness_ratio.png
-figures/lammps_static_hooke.png
-figures/lammps_static_hertz.png
-figures/lammps_collision_force_time.png
-figures/lammps_collision_force_overlap.png
-data/theory_curves.csv
-data/parameters.csv
-data/static_comparison.csv
-data/collision_comparison.csv
-lammps/in.static_hooke.lmp
-lammps/in.static_hertz.lmp
-lammps/in.collision.lmp
+```math
+k_{{\\mathrm{{flat}}}} = 2 E^{{\\ast}} a = {_sci(p['k_flat_Npm'], unit=r"\mathrm{N/m}")}
+```
+
+At $\\delta = 2\\,\\mu\\mathrm{{m}}$ the Hertz tangent stiffness is $k_{{H}} = {_sci(p['k_sphere_Npm'], unit=r"\mathrm{N/m}")}$.
+
+The stiffness ratio is $k_{{\\mathrm{{flat}}}} / k_{{H}}(2\\,\\mu\\mathrm{{m}}) = {ratio:.4f}$.
+
+The rounded report values $5.20 \\times 10^{{6}}\\,\\mathrm{{N/m}}$, $2.075 \\times 10^{{8}}\\,\\mathrm{{N/m}}$, and a ratio of about $39.9$ are the same results.
+
+## Linear spring-dashpot used in LAMMPS
+
+The sphere spring is the Hertz tangent stiffness at $2\\,\\mu\\mathrm{{m}}$:
+
+```math
+k_{{n}} = k_{{H}}(2\\,\\mu\\mathrm{{m}}) = {_sci(p['k_sphere_Npm'], unit=r"\mathrm{N/m}")}
+```
+
+This matches the slope of the Hertz curve at that overlap, not the Hertz force. At $2\\,\\mu\\mathrm{{m}}$,
+
+```math
+F_{{\\mathrm{{linear}}}} / F_{{H}} = {f_lin_ref/f_h_ref:.6f},
+```
+
+which is exactly $3/2$ for this calibration.
+
+| Quantity | Value |
+|---|---|
+| Density | ${RHO:.1f}\\,\\mathrm{{kg/m^3}}$ |
+| Sphere mass | ${_sci(p['mass_sphere_kg'], unit=r"\mathrm{kg}")}$ |
+| Reduced mass | ${_sci(p['mass_eff_kg'], unit=r"\mathrm{kg}")}$ |
+| Restitution $e$ | ${RESTITUTION:.2f}$ |
+| Damping $\\gamma_{{n}}$ | ${_sci(p['gamma_n'], unit=r"\mathrm{N\,s/m}")}$ |
+
+```math
+\\gamma_{{n}} = -\\frac{{2 \\ln(e) \\sqrt{{m_{{\\mathrm{{eff}}}} k_{{n}}}}}}{{\\sqrt{{\\pi^{{2}} + \\left[\\ln(e)\\right]^{{2}}}}}}
+```
+
+LAMMPS uses `pair_style granular`, normal model hooke, `damping velocity`, and frictionless `linear_nohistory` tangential contact. With `damping velocity` the coefficient is $\\gamma_{{n}}$ itself:
+
+```math
+F = k_{{n}} \\delta + \\gamma_{{n}} \\dot{{\\delta}}
+```
+
+during contact.
+
+## LAMMPS tests
+
+### Static overlap sweep
+
+Overlaps run from $0.1\\,\\mu\\mathrm{{m}}$ to $2.0\\,\\mu\\mathrm{{m}}$ in steps of $0.1\\,\\mu\\mathrm{{m}}$, with both particles at rest.
+
+| Comparison | Maximum relative error | RMS relative error |
+|---|---|---|
+| Hooke versus $k_{{n}}\\delta$ | ${_sci(stats['hooke_max_rel'], 3)}$ | ${_sci(stats['hooke_rms_rel'], 3)}$ |
+| `hertz/material` versus Hertz, $E = 70\\,\\mathrm{{GPa}}$, $\\nu = 0.22$ | ${_sci(stats['hertz_max_rel'], 3)}$ | ${_sci(stats['hertz_rms_rel'], 3)}$ |
+
+At $2\\,\\mu\\mathrm{{m}}$, $F_{{\\mathrm{{linear}}}} / F_{{H}} = {stats['force_ratio_at_2um']:.6f}$ from the two LAMMPS models.
+
+### Head-on collision
+
+Two free spheres start with a gap of $2\\,\\mu\\mathrm{{m}}$.
+
+| Quantity | Value |
+|---|---|
+| Prescribed approach speed | ${_sci(p['v_rel_mps'], unit=r"\mathrm{m/s}")}$ |
+| Measured incoming speed | ${_sci(stats['v_in'], unit=r"\mathrm{m/s}")}$ |
+| Measured separating speed | ${_sci(stats['v_out'], unit=r"\mathrm{m/s}")}$ |
+| Measured restitution | ${stats['e_meas']:.6f}$ (target ${RESTITUTION:.2f}$) |
+| Peak overlap | ${stats['delta_max']*1e6:.4f}\\,\\mu\\mathrm{{m}}$ |
+| Peak repulsive force | ${stats['f_max']:.6f}\\,\\mathrm{{N}}$ |
+| Contact samples | {stats['n_contact']} |
+
+Force compared with $k_{{n}}\\delta + \\gamma_{{n}}\\dot{{\\delta}}$, using the half-step velocity at which LAMMPS evaluates damping:
+
+- Maximum relative error ${_sci(stats['collision_max_rel'], 3)}$
+- RMS relative error ${_sci(stats['collision_rms_rel'], 3)}$
+
+The same formula with the dumped end-of-step velocity is low by a uniform factor. The median relative offset is ${_sci(stats['collision_end_step_rel'], 3)}$, which matches $\\gamma_{{n}} \\Delta t / m = {_sci(stats['half_kick'], 3)}$.
+
+## Modeling differences
+
+- The LAMMPS hooke run reproduces the linear law. The largest relative force error on the static sweep is about ${_sci(8e-15, 0)}$, which is floating-point roundoff.
+- Hertz force grows as $\\delta^{{3/2}}$. The linear spring calibrated to the tangent stiffness at $2\\,\\mu\\mathrm{{m}}$ is stiffer, in the secant sense $F/\\delta$, at every overlap in this range, and its force is $1.5$ times the Hertz force at $2\\,\\mu\\mathrm{{m}}$.
+- Loading and unloading in the collision do not follow a single force–overlap curve. Damping adds force while the overlap is increasing and subtracts force while the overlap is decreasing.
+- LAMMPS writes the velocity after the second velocity-Verlet kick. The pair force was computed with the velocity from half a step earlier. Comparing the dumped velocity directly to $k_{{n}}\\delta + \\gamma_{{n}}\\dot{{\\delta}}$ therefore shifts every contact force by about $\\gamma_{{n}}\\Delta t/m$, here $0.030\\%$. Removing that half-step leaves a residual at roundoff, so the contact law itself matches.
+- The measured restitution, $0.8997$ against the target $0.90$, is the same timestep effect. The continuous-time damping formula is exact only as $\\Delta t$ goes to zero. This run uses $10^{{-7}}\\,\\mathrm{{s}}$, about 350 steps of contact.
+- Near the end of contact the damping term can exceed the spring term, so the pair force becomes tensile for a short interval. The input does not set `limit_damping`, which is the LAMMPS option that removes that tensile spike.
+- The cube–cube flat-punch law is carried in the Python curves only. This LAMMPS model is a sphere–sphere pair; a square face is not represented.
+- The flat-punch stiffness uses an equal-area circle of radius ${p['punch_radius_m']*1e3:.4f}\\,\\mathrm{{mm}}$ in place of the square face. That geometric substitution is unchanged from the weekly report.
+
+## Outputs
+
+- `figures/force_overlap.png`
+- `figures/stiffness_overlap.png`
+- `figures/stiffness_ratio.png`
+- `figures/lammps_static_hooke.png`
+- `figures/lammps_static_hertz.png`
+- `figures/lammps_collision_force_time.png`
+- `figures/lammps_collision_force_overlap.png`
+- `data/theory_curves.csv`
+- `data/parameters.csv`
+- `data/static_comparison.csv`
+- `data/collision_comparison.csv`
+- `lammps/in.static_hooke.lmp`
+- `lammps/in.static_hertz.lmp`
+- `lammps/in.collision.lmp`
 """
-    (ROOT / "RESULTS.txt").write_text(text, newline="\n")
+    target = ROOT / "RESULTS.md"
+    target.write_text(text, encoding="utf-8", newline="\n")
+    legacy = ROOT / "RESULTS.txt"
+    if legacy.exists():
+        legacy.unlink()
     print(text)
+
+
+
 
 
 def main() -> None:
