@@ -10,51 +10,55 @@ Both particles are 5 mm in size and share the same material, so the stiffness di
 
 | Quantity | Sphere–sphere | Cube–cube |
 |---|---|---|
-| Size | Radius $R = 5\ \mathrm{mm}$ | Side $L = 5\ \mathrm{mm}$ |
-| Contact measure | $R^{*} = R/2 = 2.5\ \mathrm{mm}$ | Equal-area punch radius $a = 2.821\ \mathrm{mm}$ |
-| Modulus | $E = 70\ \mathrm{GPa}$, $\nu = 0.22$, $E^{*} = 36.78\ \mathrm{GPa}$ | same |
-| Overlap range | $0$–$2\ \mu\mathrm{m}$ | same |
+| Size | Radius $R = 5\,\mathrm{mm}$ | Side $L = 5\,\mathrm{mm}$ |
+| Contact measure | $R^{\ast} = R/2 = 2.5\,\mathrm{mm}$ | Equal-area punch radius $a = 2.821\,\mathrm{mm}$ |
+| Modulus | $E = 70\,\mathrm{GPa}$, $\nu = 0.22$, $E^{\ast} = 36.78\,\mathrm{GPa}$ | same |
+| Overlap range | $0$ to $2\,\mu\mathrm{m}$ | same |
 | Force | $F \propto \delta^{3/2}$ | $F \propto \delta$ |
 | Stiffness | $k \propto \sqrt{\delta}$ | constant |
-| Representative $k_n$ | $5.202 \times 10^{6}\ \mathrm{N/m}$ at $2\ \mu\mathrm{m}$ | $2.075 \times 10^{8}\ \mathrm{N/m}$ |
+| Representative $k_{n}$ | $5.202 \times 10^{6}\,\mathrm{N/m}$ at $2\,\mu\mathrm{m}$ | $2.075 \times 10^{8}\,\mathrm{N/m}$ |
 
 The effective modulus for two identical bodies is
 
-$$
-E^{*} = \frac{E}{2\left(1-\nu^{2}\right)}.
-$$
+```math
+E^{\ast} = \frac{E}{2\left(1-\nu^{2}\right)}.
+```
 
 ## Contact laws
 
 Hertz force and tangent stiffness for two spheres:
 
-$$
-F_H = \frac{4}{3} E^{*} \sqrt{R^{*}}\, \delta^{3/2},
-\qquad
-k_H = \frac{dF_H}{d\delta} = 2 E^{*} \sqrt{R^{*} \delta}.
-$$
+```math
+F_{H} = \frac{4}{3} E^{\ast} \sqrt{R^{\ast}} \, \delta^{3/2}
+```
+
+```math
+k_{H} = \frac{dF_{H}}{d\delta} = 2 E^{\ast} \sqrt{R^{\ast} \delta}
+```
 
 Flat punch on the cube face. The square face is replaced by a circle of the same area, $a = \sqrt{A/\pi}$ with $A = L^{2}$:
 
-$$
-F_{\mathrm{flat}} = 2 E^{*} a\, \delta,
-\qquad
-k_{\mathrm{flat}} = 2 E^{*} a.
-$$
+```math
+F_{\mathrm{flat}} = 2 E^{\ast} a \, \delta
+```
 
-At $2\ \mu\mathrm{m}$, $k_{\mathrm{flat}}/k_H \approx 39.9$. The ratio is larger at smaller overlap because the Hertz stiffness falls toward zero as contact begins, while the flat-punch stiffness does not.
+```math
+k_{\mathrm{flat}} = 2 E^{\ast} a
+```
+
+At $2\,\mu\mathrm{m}$, $k_{\mathrm{flat}}/k_{H} \approx 39.9$. The ratio is larger at smaller overlap because the Hertz stiffness falls toward zero as contact begins, while the flat-punch stiffness does not.
 
 The DEM spring is linear,
 
-$$
-F_n = k_n \delta + \gamma_n \dot{\delta}.
-$$
+```math
+F_{n} = k_{n} \delta + \gamma_{n} \dot{\delta}.
+```
 
-For the sphere, $k_n$ is the Hertz tangent stiffness at $2\ \mu\mathrm{m}$. That choice matches the slope of the Hertz curve at one overlap, not the Hertz force. At $2\ \mu\mathrm{m}$ the linear force is $3/2$ times the Hertz force. With density $2500\ \mathrm{kg/m^{3}}$ and restitution $e = 0.9$,
+For the sphere, $k_{n}$ is the Hertz tangent stiffness at $2\,\mu\mathrm{m}$. That choice matches the slope of the Hertz curve at one overlap, not the Hertz force. At $2\,\mu\mathrm{m}$ the linear force is $3/2$ times the Hertz force. With density $2500\,\mathrm{kg/m^{3}}$ and restitution $e = 0.9$,
 
-$$
-\gamma_n = -\frac{2 \ln(e) \sqrt{m_{\mathrm{eff}} k_n}}{\sqrt{\pi^{2} + \left[\ln(e)\right]^{2}}} = 3.911\ \mathrm{N\,s/m}
-$$
+```math
+\gamma_{n} = -\frac{2 \ln(e) \sqrt{m_{\mathrm{eff}} k_{n}}}{\sqrt{\pi^{2} + \left[\ln(e)\right]^{2}}} = 3.911\,\mathrm{N\,s/m}
+```
 
 for the sphere pair.
 
@@ -82,13 +86,13 @@ The script rewrites the inputs, reruns the three LAMMPS cases, and refreshes `fi
 
 ## Agreement with LAMMPS
 
-On the static overlap sweep ($0.1$–$2.0\ \mu\mathrm{m}$, particles at rest):
+On the static overlap sweep from $0.1\,\mu\mathrm{m}$ to $2.0\,\mu\mathrm{m}$, with the particles at rest:
 
-- Hooke force versus $k_n \delta$: maximum relative error about $8 \times 10^{-15}$.
+- Hooke force versus $k_{n}\delta$: maximum relative error about $8 \times 10^{-15}$.
 - `hertz/material` versus the Hertz formula: maximum relative error about $3 \times 10^{-15}$.
-- At $2\ \mu\mathrm{m}$ the two LAMMPS models still differ by the expected factor $F_{\mathrm{linear}}/F_H = 1.5$.
+- At $2\,\mu\mathrm{m}$ the two LAMMPS models still differ by the expected factor $F_{\mathrm{linear}}/F_{H} = 1.5$.
 
-The head-on collision of two free spheres reaches a peak overlap of $2.001\ \mu\mathrm{m}$ and a peak force of $10.43\ \mathrm{N}$. After the velocity-Verlet half-step is accounted for, the spring-dashpot force matches LAMMPS to about $10^{-12}$ relative error. The measured restitution is $0.8997$ against the target $0.90$, with a timestep of $10^{-7}\ \mathrm{s}$ (about 350 steps in contact).
+The head-on collision of two free spheres reaches a peak overlap of $2.001\,\mu\mathrm{m}$ and a peak force of $10.43\,\mathrm{N}$. After the velocity-Verlet half-step is accounted for, the spring-dashpot force matches LAMMPS to about $10^{-12}$ relative error. The measured restitution is $0.8997$ against the target $0.90$, with a timestep of $10^{-7}\,\mathrm{s}$ (about 350 steps in contact).
 
 Loading and unloading do not share one force–overlap line: damping raises the force while the overlap grows and lowers it while the overlap shrinks. Near separation the damping term can exceed the spring term, so the force is briefly tensile. The inputs do not set `limit_damping`.
 
